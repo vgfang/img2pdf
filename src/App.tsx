@@ -1,5 +1,5 @@
 import './App.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import convertImagesToPdf from '@/lib/convert-img-to-pdf';
+import estimatePdfFileSize from '@/lib/estimate-pdf-filesize';
 import { PAGE_FORMATS } from '@/lib/page-formats';
 import { MARGIN_OPTIONS } from '@/lib/margin-options';
 
@@ -26,27 +27,49 @@ function App() {
   const [images, setImages] = useState<File[]>([]);
   const [progress, setProgress] = useState(0);
   const [quality, setQuality] = useState(90);
-  const [fileSize, setFileSize] = useState(70);
+  const [fileSizeEstimation, setFileSizeEstimation] = useState('0 Kb');
   const [format, setFormat] = useState(DEFAULT_FORMAT);
   const [portrait, setPortrait] = useState(false);
   const [greyscale, setGreyscale] = useState(false);
   const [margin, setMargin] = useState('0');
+  const [scaleUp, setScaleUp] = useState(true);
 
-  const estimateFileSize = () => {
-    let estimate = 0;
-    for (const image in images) {
-      // TODO
+  useEffect(() => {
+    const pg = PAGE_FORMATS.find((pf) => pf.value === format);
+    if (!pg) {
+      setFileSizeEstimation('error');
+      return;
     }
-    setFileSize(estimate);
-  };
+
+    const timer = setTimeout(() => {
+      estimatePdfFileSize(images, pg.widthIn, pg.heightIn, quality).then(
+        (estimate) => setFileSizeEstimation(estimate)
+      );
+    }, 300); // Wait 300ms after user stops changing slider
+
+    return () => clearTimeout(timer);
+  }, [images, quality, format]);
 
   const setUploadedImages = (uploadedImages: UploadedImage[]) => {
     setImages(uploadedImages.map((img) => img.file));
   };
 
   const handleConvertImagesToPdf = () => {
-    console.log(images);
-    convertImagesToPdf(images, quality, setProgress).then((blob) => {
+    const pageFormat = PAGE_FORMATS.find((pf) => pf.value === format);
+    if (!pageFormat) {
+      alert('error fetching page format');
+      return;
+    }
+    convertImagesToPdf(
+      images,
+      quality,
+      pageFormat,
+      portrait,
+      greyscale,
+      margin,
+      scaleUp,
+      setProgress
+    ).then((blob) => {
       const url = URL.createObjectURL(blob);
       const date = new Date();
       const a = document.createElement('a');
@@ -56,7 +79,7 @@ function App() {
       a.click();
       setTimeout(() => {
         setProgress(0);
-      }, 1000);
+      }, 600);
     });
   };
 
@@ -98,6 +121,14 @@ function App() {
           />
           <Separator />
           <div className="flex flex-row items-center gap-2 py-2">
+            <Label htmlFor="greyscale">Scale images up:</Label>
+            <Checkbox
+              id="scale"
+              checked={scaleUp}
+              onCheckedChange={(value) =>
+                setScaleUp(typeof value == 'boolean' ? value : false)
+              }
+            />
             <Label htmlFor="greyscale">Greyscale:</Label>
             <Checkbox
               id="greyscale"
@@ -116,7 +147,7 @@ function App() {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>Select Format:</SelectLabel>
+                  <SelectLabel>Set Page Format:</SelectLabel>
                   {PAGE_FORMATS.map((format) => (
                     <SelectItem key={format.value} value={format.value}>
                       {format.label}
@@ -144,7 +175,7 @@ function App() {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>Set Inches:</SelectLabel>
+                  <SelectLabel>Set Margin Inches:</SelectLabel>
                   {MARGIN_OPTIONS.map((margin) => (
                     <SelectItem key={margin.value} value={margin.value}>
                       {margin.label}
@@ -168,7 +199,7 @@ function App() {
           </Button>
           <Progress value={progress} />
           <p className="whitespace-nowrap tabular-nums">
-            ~{fileSize.toFixed(2)} MB
+            ~{fileSizeEstimation}
           </p>
         </div>
       </div>

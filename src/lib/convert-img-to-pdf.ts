@@ -1,44 +1,45 @@
 import { PDFDocument } from 'pdf-lib';
+import { type PageFormat } from '@/lib/page-formats';
 
-const fitImageToPage = (
-  imgWidth: number,
-  imgHeight: number,
-  pageWidth: number,
-  pageHeight: number
+const DPI = 300;
+
+const getTargetPixelSize = (
+  boxDim: { width: number; height: number },
+  imageDim: { width: number; height: number }
 ) => {
-  const imgRatio = imgWidth / imgHeight;
-  const pageRatio = pageWidth / pageHeight;
+  const widthRatio = boxDim.width / imageDim.width;
+  const heightRatio = boxDim.height / imageDim.height;
 
-  let width = pageWidth;
-  let height = pageHeight;
+  const scaleFactor = Math.min(1, widthRatio, heightRatio);
 
-  if (imgRatio > pageRatio) {
-    height = width / imgRatio;
-  } else {
-    width = height * imgRatio;
-  }
-
-  const x = (pageWidth - width) / 2;
-  const y = pageHeight - height; // top anchored
-
-  return { width, height, x, y };
+  return {
+    targetWidthPx: Math.round(imageDim.width * scaleFactor),
+    targetHeightPx: Math.round(imageDim.height * scaleFactor),
+  };
 };
 
 const compressImage = async (
   image: File,
-  quality: number
+  quality: number,
+  targetWidthPx: number,
+  targetHeightPx: number,
+  greyscale: boolean
 ): Promise<ArrayBuffer> => {
   const bitmap = await createImageBitmap(image);
   const canvas = document.createElement('canvas');
-  canvas.width = bitmap.width;
-  canvas.height = bitmap.height;
+  canvas.width = targetWidthPx;
+  canvas.height = targetHeightPx;
   const ctx = canvas.getContext('2d', { colorSpace: 'srgb' });
   if (!ctx) {
     alert('Failed to get context');
     throw new Error('Failed to get canvas context');
   }
 
-  ctx.drawImage(bitmap, 0, 0);
+  if (greyscale) {
+    ctx.filter = 'grayscale(100%)';
+  }
+
+  ctx.drawImage(bitmap, 0, 0, targetWidthPx, targetHeightPx);
   const qual = quality / 100;
 
   const blob = await new Promise<Blob>((resolve, reject) => {
@@ -58,34 +59,87 @@ const compressImage = async (
   return blob.arrayBuffer();
 };
 
+const ptsToPx = (pts: number) => {
+  return Math.round((pts / 72) * DPI);
+};
+
 const convertImagesToPdf = async (
   images: File[],
   quality: number,
+  pg: PageFormat,
+  portrait: boolean,
+  greyscale: boolean,
+  margin: string,
+  scaleUp: boolean,
   setProgress: (value: number) => void
 ): Promise<Blob> => {
   const pdfDoc = await PDFDocument.create();
+
+  // get page and content dimensions
+  const marginIn = Number(margin);
+  const marginPts = marginIn * 72;
+
+  let pageWidthPts = pg.widthIn * 72;
+  let pageHeightPts = pg.heightIn * 72;
+
+  if (portrait) {
+    [pageWidthPts, pageHeightPts] = [pageHeightPts, pageWidthPts];
+  }
+  const contentWidthPts = pageWidthPts - marginPts * 2;
+  const contentHeightPts = pageHeightPts - marginPts * 2;
+  const contentWidthPx = ptsToPx(contentWidthPts);
+  const contentHeightPx = ptsToPx(contentHeightPts);
+
   for (const [i, image] of images.entries()) {
-    const compressedImgBytes = await compressImage(image, quality);
-    const pdfImg = await pdfDoc.embedJpg(compressedImgBytes);
+    // analyze original image
+    const bitmap = await createImageBitmap(image);
+    const imgDim = { width: bitmap.width, height: bitmap.height };
 
-    const page = pdfDoc.addPage();
-    const pageWidth = page.getWidth();
-    const pageHeight = page.getHeight();
-
-    const { width, height, x, y } = fitImageToPage(
-      pdfImg.width,
-      pdfImg.height,
-      pageWidth,
-      pageHeight
+    // scaling image up / compressing to fit DPI in case it's bigger
+    const { targetWidthPx, targetHeightPx } = getTargetPixelSize(
+      { width: contentWidthPx, height: contentHeightPx },
+      imgDim
     );
 
-    page.drawImage(pdfImg, {
-      x: x,
-      y: y,
-      width: width,
-      height: height,
-    });
+    // jpeg compression
+    const compressedImgBytes = await compressImage(
+      image,
+      quality,
+      targetWidthPx,
+      targetHeightPx,
+      greyscale
+    );
 
+    // put image in pdf page
+    const pdfImg = await pdfDoc.embedJpg(compressedImgBytes);
+    const page = pdfDoc.addPage([pageWidthPts, pageHeightPts]);
+
+    // calculate draw-time scaling to fit inside content box
+    const imgW = pdfImg.width;
+    const imgH = pdfImg.height;
+
+    const wRatio = contentWidthPts / imgW;
+    const hRatio = contentHeightPts / imgH;
+
+    let scale = Math.min(wRatio, hRatio);
+
+    if (!scaleUp && scale > 1) {
+      // NOT WORKING
+      scale = 1;
+    }
+
+    const drawWidth = imgW * scale;
+    const drawHeight = imgH * scale;
+
+    const drawX = marginPts + (contentWidthPts - drawWidth) / 2;
+    const drawY = marginPts + (contentHeightPts - drawHeight);
+
+    page.drawImage(pdfImg, {
+      x: drawX,
+      y: drawY,
+      width: drawWidth,
+      height: drawHeight,
+    });
     setProgress(Math.round(((i + 1) / images.length) * 100));
   }
 
