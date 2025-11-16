@@ -1,0 +1,46 @@
+body {
+  background-color: #f7f4f2;
+}
+
+h1 {
+  font-size: 36px;
+}
+
+h2 {
+  font-size: 18px;
+}
+
+h1,
+h2 {
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.accent {
+  color: #624c83;
+}
+
+.background-accent {
+  color: white;
+  background-color: #624c83;
+}
+
+button,
+[data-slot="button"],
+[data-slot="checkbox"],
+[data-slot="slider-thumb"],
+[data-slot="select-item"],
+[data-slot="select-trigger"],
+a {
+  cursor: pointer;
+}
+
+[data-slot="checkbox"],
+[data-slot="select-trigger"] {
+  border-color: black;
+}
+
+[data-slot="slider-track"],
+[data-slot="progress"] {
+  background-color: lightgrey;
+}
