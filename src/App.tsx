@@ -1,12 +1,12 @@
-import "./App.css";
-import { useState } from "react";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
-import { ImageUploader, type UploadedImage } from "@/components/image-uploader";
+import './App.css';
+import { useState } from 'react';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
+import { ImageUploader, type UploadedImage } from '@/components/image-uploader';
 import {
   Select,
   SelectContent,
@@ -15,13 +15,13 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import convertImagesToPdf from "@/lib/convert-img-to-pdf";
-import { PAGE_FORMATS } from "@/lib/page-formats";
-import { MARGIN_OPTIONS } from "@/lib/margin-options";
+} from '@/components/ui/select';
+import convertImagesToPdf from '@/lib/convert-img-to-pdf';
+import { PAGE_FORMATS } from '@/lib/page-formats';
+import { MARGIN_OPTIONS } from '@/lib/margin-options';
 
 function App() {
-  const DEFAULT_FORMAT = "a4";
+  const DEFAULT_FORMAT = 'a4';
 
   const [images, setImages] = useState<File[]>([]);
   const [progress, setProgress] = useState(0);
@@ -30,7 +30,7 @@ function App() {
   const [format, setFormat] = useState(DEFAULT_FORMAT);
   const [portrait, setPortrait] = useState(false);
   const [greyscale, setGreyscale] = useState(false);
-  const [margin, setMargin] = useState("0");
+  const [margin, setMargin] = useState('0');
 
   const estimateFileSize = () => {
     let estimate = 0;
@@ -49,7 +49,7 @@ function App() {
     convertImagesToPdf(images, quality, setProgress).then((blob) => {
       const url = URL.createObjectURL(blob);
       const date = new Date();
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
       console.log(url);
       a.download = `img2pdf-${date.toLocaleString()}.pdf`;
@@ -68,7 +68,7 @@ function App() {
           Convert images to PDF files with an image on each page.
         </p>
         <p className="text-left">
-          Made by{" "}
+          Made by{' '}
           <a href="https://github.com/vgfang" className="cursor-pointer">
             me.
           </a>
@@ -103,7 +103,7 @@ function App() {
               id="greyscale"
               checked={greyscale}
               onCheckedChange={(value) =>
-                setGreyscale(typeof value == "boolean" ? value : false)
+                setGreyscale(typeof value == 'boolean' ? value : false)
               }
             />
           </div>
@@ -131,7 +131,7 @@ function App() {
               id="portrait"
               checked={portrait}
               onCheckedChange={(value) =>
-                setPortrait(typeof value == "boolean" ? value : false)
+                setPortrait(typeof value == 'boolean' ? value : false)
               }
             />
           </div>

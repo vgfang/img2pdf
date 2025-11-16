@@ -1,4 +1,4 @@
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument } from 'pdf-lib';
 
 const fitImageToPage = (
   imgWidth: number,
@@ -29,13 +29,13 @@ const compressImage = async (
   quality: number
 ): Promise<ArrayBuffer> => {
   const bitmap = await createImageBitmap(image);
-  const canvas = document.createElement("canvas");
+  const canvas = document.createElement('canvas');
   canvas.width = bitmap.width;
   canvas.height = bitmap.height;
-  const ctx = canvas.getContext("2d", { colorSpace: "srgb" });
+  const ctx = canvas.getContext('2d', { colorSpace: 'srgb' });
   if (!ctx) {
-    alert("Failed to get context");
-    throw new Error("Failed to get canvas context");
+    alert('Failed to get context');
+    throw new Error('Failed to get canvas context');
   }
 
   ctx.drawImage(bitmap, 0, 0);
@@ -47,10 +47,10 @@ const compressImage = async (
         if (blob) {
           resolve(blob);
         } else {
-          reject(new Error("Failed to compress image"));
+          reject(new Error('Failed to compress image'));
         }
       },
-      "image/jpeg",
+      'image/jpeg',
       qual
     );
   });
@@ -91,7 +91,7 @@ const convertImagesToPdf = async (
 
   const pdfBytes = await pdfDoc.save();
 
-  return new Blob([pdfBytes] as BlobPart[], { type: "application/pdf" });
+  return new Blob([pdfBytes] as BlobPart[], { type: 'application/pdf' });
 };
 
 export default convertImagesToPdf;

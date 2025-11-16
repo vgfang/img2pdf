@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Upload, X, GripVertical } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Upload, X, GripVertical } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface UploadedImage {
   id: string;
@@ -15,14 +15,14 @@ interface ImageUploaderProps {
 
 function truncateFilename(name: string, maxLength: number = 20): string {
   if (name.length <= maxLength) return name;
-  const dotIndex = name.lastIndexOf(".");
-  const ext = dotIndex > -1 ? name.slice(dotIndex) : "";
+  const dotIndex = name.lastIndexOf('.');
+  const ext = dotIndex > -1 ? name.slice(dotIndex) : '';
   const nameWithoutExt = dotIndex > -1 ? name.slice(0, dotIndex) : name;
   const availableLength = maxLength - ext.length - 3; // 3 for "..."
   const start = Math.ceil(availableLength / 2);
   const end = availableLength - start;
   return (
-    nameWithoutExt.slice(0, start) + "..." + nameWithoutExt.slice(-end) + ext
+    nameWithoutExt.slice(0, start) + '...' + nameWithoutExt.slice(-end) + ext
   );
 }
 
@@ -36,7 +36,7 @@ export function ImageUploader({ onImagesChange }: ImageUploaderProps) {
     if (!files) return;
 
     const fileArray = Array.from(files).filter((file) =>
-      file.type.startsWith("image/")
+      file.type.startsWith('image/')
     );
     const filesToAdd = fileArray.slice(0);
 
@@ -84,12 +84,12 @@ export function ImageUploader({ onImagesChange }: ImageUploaderProps) {
   // Handle drag and drop reordering
   const handleDragStart = (e: React.DragEvent, id: string) => {
     setDraggedItem(id);
-    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.effectAllowed = 'move';
   };
 
   const handleDragOverItem = (e: React.DragEvent) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
+    e.dataTransfer.dropEffect = 'move';
   };
 
   const handleDropItem = (e: React.DragEvent, targetId: string) => {
@@ -130,10 +130,10 @@ export function ImageUploader({ onImagesChange }: ImageUploaderProps) {
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
         className={cn(
-          "relative rounded-lg border-2 border-dashed p-8 text-center transition-colors cursor-pointer",
+          'relative rounded-lg border-2 border-dashed p-8 text-center transition-colors cursor-pointer',
           isDragging
-            ? "border-primary bg-primary/5"
-            : "border-muted-foreground/25 bg-background hover:bg-muted/50"
+            ? 'border-primary bg-primary/5'
+            : 'border-muted-foreground/25 bg-background hover:bg-muted/50'
         )}
       >
         <input
@@ -149,7 +149,7 @@ export function ImageUploader({ onImagesChange }: ImageUploaderProps) {
           <div>
             <p className="font-medium">Drag and drop images here</p>
             <p className="text-muted-foreground">
-              or{" "}
+              or{' '}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -162,7 +162,7 @@ export function ImageUploader({ onImagesChange }: ImageUploaderProps) {
             </p>
           </div>
           <p>
-            {images.length} {images.length === 1 ? "image" : "images"}
+            {images.length} {images.length === 1 ? 'image' : 'images'}
           </p>
         </div>
       </div>
@@ -178,14 +178,14 @@ export function ImageUploader({ onImagesChange }: ImageUploaderProps) {
               onDragOver={handleDragOverItem}
               onDrop={(e) => handleDropItem(e, image.id)}
               className={cn(
-                "group relative aspect-square cursor-move rounded-lg border transition-all",
+                'group relative aspect-square cursor-move rounded-lg border transition-all',
                 draggedItem === image.id
-                  ? "border-primary bg-primary/10 opacity-50"
-                  : "border-border hover:border-primary/50 hover:shadow-md"
+                  ? 'border-primary bg-primary/10 opacity-50'
+                  : 'border-border hover:border-primary/50 hover:shadow-md'
               )}
             >
               <img
-                src={image.preview || "/placeholder.svg"}
+                src={image.preview || '/placeholder.svg'}
                 alt="upload preview"
                 className="h-full w-full rounded-lg object-cover"
               />

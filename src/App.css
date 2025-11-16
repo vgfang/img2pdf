@@ -26,21 +26,21 @@ h2 {
 }
 
 button,
-[data-slot="button"],
-[data-slot="checkbox"],
-[data-slot="slider-thumb"],
-[data-slot="select-item"],
-[data-slot="select-trigger"],
+[data-slot='button'],
+[data-slot='checkbox'],
+[data-slot='slider-thumb'],
+[data-slot='select-item'],
+[data-slot='select-trigger'],
 a {
   cursor: pointer;
 }
 
-[data-slot="checkbox"],
-[data-slot="select-trigger"] {
+[data-slot='checkbox'],
+[data-slot='select-trigger'] {
   border-color: black;
 }
 
-[data-slot="slider-track"],
-[data-slot="progress"] {
+[data-slot='slider-track'],
+[data-slot='progress'] {
   background-color: lightgrey;
 }
