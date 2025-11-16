@@ -7,8 +7,14 @@ simple web app for converting images to pdf file with an image on each page
 ### features
 
 - greyscale toggle
+- image scale up to maximize content toggle
 - page formats
 - adjust page margin in inches
+
+### specs
+
+- outputs to 300 DPI and scales images down if too big
+- uses JPEG compression to lower file size
 
 ### tech
 

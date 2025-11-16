@@ -63,6 +63,10 @@ const ptsToPx = (pts: number) => {
   return Math.round((pts / 72) * DPI);
 };
 
+const pxToPts = (px: number) => {
+  return Math.round((px * 72) / DPI);
+};
+
 const convertImagesToPdf = async (
   images: File[],
   quality: number,
@@ -114,22 +118,24 @@ const convertImagesToPdf = async (
     const pdfImg = await pdfDoc.embedJpg(compressedImgBytes);
     const page = pdfDoc.addPage([pageWidthPts, pageHeightPts]);
 
-    // calculate draw-time scaling to fit inside content box
-    const imgW = pdfImg.width;
-    const imgH = pdfImg.height;
+    // convert image px to pts
+    const imgWidthPts = pxToPts(targetWidthPx);
+    const imgHeightPts = pxToPts(targetHeightPx);
 
-    const wRatio = contentWidthPts / imgW;
-    const hRatio = contentHeightPts / imgH;
+    // decide if we should scale up to fill box
+    let drawWidth = imgWidthPts;
+    let drawHeight = imgHeightPts;
 
-    let scale = Math.min(wRatio, hRatio);
+    if (scaleUp) {
+      const wRatio = contentWidthPts / imgWidthPts;
+      const hRatio = contentHeightPts / imgHeightPts;
+      const scale = Math.min(wRatio, hRatio);
 
-    if (!scaleUp && scale > 1) {
-      // NOT WORKING
-      scale = 1;
+      if (scale > 1) {
+        drawWidth *= scale;
+        drawHeight *= scale;
+      }
     }
-
-    const drawWidth = imgW * scale;
-    const drawHeight = imgH * scale;
 
     const drawX = marginPts + (contentWidthPts - drawWidth) / 2;
     const drawY = marginPts + (contentHeightPts - drawHeight);

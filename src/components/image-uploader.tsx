@@ -201,7 +201,14 @@ export function ImageUploader({ onImagesChange }: ImageUploaderProps) {
                 <X className="h-[18px] w-[18px]" />
               </button>
 
-              <div className="absolute bottom-1 left-1 right-1 flex items-center gap-1.5 rounded bg-background/95 px-2 py-1 border border-border">
+              <div
+                className="absolute bottom-1 left-1 right-1 flex items-center gap-1.5 rounded bg-background/95 px-2 py-1 border border-border cursor-pointer hover:bg-muted/70"
+                onClick={(e) => {
+                  e.stopPropagation(); // prevent starting a drag or triggering remove, etc.
+                  window.open(image.preview, '_blank');
+                }}
+                title="Open full image"
+              >
                 <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-foreground text-background text-xs font-medium">
                   {images.indexOf(image) + 1}
                 </div>
