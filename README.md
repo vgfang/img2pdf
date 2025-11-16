@@ -2,7 +2,7 @@
 
 simple web app for converting images to pdf file with an image on each page
 
-[available on github pages](https://vgfang.github.com/img2pdf)
+[available on github pages](https://vgfang.github.io/img2pdf/)
 
 ### features
 
